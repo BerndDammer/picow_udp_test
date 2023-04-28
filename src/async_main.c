@@ -27,7 +27,7 @@ volatile unsigned int poll_counter;
 void async_main_loop(void)
 {
 	async_context_t *async_context_cyw43;
-	async_context_t *async_context_lwip;;
+	//async_context_t *async_context_lwip;;
 	async_context_t *async_context_console;
 	async_context_t *async_context_blinky;
 
@@ -41,11 +41,8 @@ void async_main_loop(void)
 	{
 		app_panic("cyw43 iii");
 	}
-	async_context_lwip = async_lwip_init();
-	if (async_context_lwip == NULL )
-	{
-		app_panic("lwip iii");
-	}
+	async_lwip_init(async_context_cyw43 );
+
 	async_context_console = async_console_init();
 	if (async_context_console == NULL )
 	{

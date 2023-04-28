@@ -11,7 +11,6 @@ void main()
 	stdio_init_all();
 
 	puts("\nEntry");
-	//udp_loop();
 	async_main_loop();
 
 }

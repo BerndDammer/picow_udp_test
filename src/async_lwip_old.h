@@ -8,7 +8,7 @@
 #ifndef ASYNC_LWIP_H_
 #define ASYNC_LWIP_H_
 
-void async_lwip_init(async_context_t *asc);
+async_context_t *async_lwip_init();
 
 
 
