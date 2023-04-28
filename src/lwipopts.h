@@ -27,6 +27,7 @@
 #define LWIP_ETHERNET               1
 #define LWIP_ICMP                   1
 
+// Must add manually
 #define LWIP_IGMP                   1
 
 #define LWIP_RAW                    1

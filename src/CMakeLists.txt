@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 # Initialise pico_sdk from installed location
 # (note this can come from environment, CMake cache etc)
-set(PICO_SDK_PATH "d:/RaspberryPiPico2/pico-sdk")
+# set(PICO_SDK_PATH "d:/RaspberryPiPico2/pico-sdk")
 
 set(PICO_BOARD pico_w CACHE STRING "Board type")
 
@@ -24,10 +24,13 @@ project(udp_test1 C CXX ASM)
 pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
-
 add_executable(udp_test1 
-udp_test1.c 
-udp_loop.c 
+	entry.c 
+	async_main.c 
+	async_lwip.c 
+	async_console.c 
+	async_cyw43.c 
+	panic.c
 )
 
 pico_set_program_name(udp_test1 "udp_test1")
@@ -38,19 +41,27 @@ pico_enable_stdio_usb(udp_test1 1)
 
 # Add the standard library to the build
 target_link_libraries(udp_test1
-        pico_stdlib)
+	pico_stdlib
+)
+
+# add async context polling
+# target_link_libraries(udp_test1 async_context)
+
+# lightweight ip isolated polling mode
+target_link_libraries(udp_test1 pico_lwip)
+target_link_libraries(udp_test1 pico_lwip_nosys)
+target_link_libraries(udp_test1 pico_lwip_arch)
+
+# driver for cyw43
+target_link_libraries(udp_test1 cyw43_driver)
+target_link_libraries(udp_test1 pico_cyw43_arch)
+target_link_libraries(udp_test1 pico_cyw43_arch_lwip_poll)
+
 
 # Add the standard include files to the build
 target_include_directories(udp_test1 PRIVATE
-  ${CMAKE_CURRENT_LIST_DIR}
-  ${CMAKE_CURRENT_LIST_DIR}/.. # for our common lwipopts or any other standard includes, if required
+  ${CMAKE_CURRENT_LIST_DIR} # for our common lwipopts or any other standard includes, if required
 )
-
-# Add any user requested libraries
-target_link_libraries(udp_test1 
-        hardware_timer
-        pico_cyw43_arch_lwip_poll
-        )
 
 pico_add_extra_outputs(udp_test1)
 
