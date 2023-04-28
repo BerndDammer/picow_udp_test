@@ -14,6 +14,7 @@
 void app_panic(char *alarm_text)
 {
 	printf(alarm_text);
+	printf("\nLocked in app_panic\n");
 	while(1);
 }
 

@@ -19,6 +19,7 @@
 #include "async_cyw43.h"
 #include "async_lwip.h"
 #include "async_console.h"
+#include "async_blinky.h"
 #include "panic.h"
 
 
@@ -28,6 +29,7 @@ void async_main_loop(void)
 	async_context_t *async_context_cyw43;
 	async_context_t *async_context_lwip;;
 	async_context_t *async_context_console;
+	async_context_t *async_context_blinky;
 
 	printf("\nStarting");
 	printf("\nTime ms since start %i", //
@@ -49,11 +51,18 @@ void async_main_loop(void)
 	{
 		app_panic("console iii");
 	}
+	async_context_blinky = async_blinky_init();
+	if (async_context_blinky == NULL )
+	{
+		app_panic("blinky iii");
+	}
+
 	while (true)
 	{
 		async_context_poll( async_context_cyw43);
 		//async_context_poll( async_context_lwip);
 		async_context_poll( async_context_console);
+		async_context_poll( async_context_blinky);
 
 		poll_counter++;
 	}

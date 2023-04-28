@@ -37,6 +37,9 @@ async_context_t* async_cyw43_init(void)
 		printf("Connected.\n");
 	}
 
+	// call it once to get a debug trigger
+	//cyw43_arch_poll();
+
 	return cyw43_arch_async_context();
 }
 

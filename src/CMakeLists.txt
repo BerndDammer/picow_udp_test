@@ -29,6 +29,7 @@ add_executable(udp_test1
 	async_main.c 
 	async_lwip.c 
 	async_console.c 
+	async_blinky.c 
 	async_cyw43.c 
 	panic.c
 )

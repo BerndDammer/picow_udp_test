@@ -25,13 +25,14 @@ async_context_poll_t async_context_lwip;
 
 async_context_t *async_lwip_init(void)
 {
-	if (!async_context_poll_init_with_defaults(&async_context_lwip))
+	bool success;
+	success = async_context_poll_init_with_defaults(&async_context_lwip);
+	if (!success)
 	{
 		app_panic("Async context lwip init fail");
 		return NULL;
 	}
 
-	bool success;
 	success = lwip_nosys_init(&async_context_lwip.core);
 	if(!success)
 	{
