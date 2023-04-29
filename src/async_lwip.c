@@ -36,60 +36,62 @@
 #define HEARTBEAT_TIMEOUT_MS 1000
 
 async_context_t *async_context_lwip;
-
 async_at_time_worker_t s_transmit_heartbeat;
 
+static char msg[] = "ooejtkperjgropejgrep";
+
+ip4_addr_t multicast_destination;
+struct udp_pcb *multicast_receive_socket;
+
+int reciece_counter = 0;
+
 void recCallBack(void *arg, struct udp_pcb *pcb, struct pbuf *p,
-		const ip_addr_t *addr, u16_t port)
-{
-	printf("\nReceive\n");
+		const ip_addr_t *addr, u16_t port) {
+
+	printf("\nReceive %i", reciece_counter++);
+	pbuf_free(p);
 }
 
-static char msg[] = "ooejtkperjgropejgrep";
-struct ip4_addr multicast_destination;
-struct udp_pcb *g_udppcb;
-
 void transmit_heartbeat(async_context_t *context,
-		struct async_work_on_timeout *worker)
-{
+		struct async_work_on_timeout *worker) {
 
 	struct pbuf *p;
 	p = pbuf_alloc(PBUF_TRANSPORT, sizeof(msg), PBUF_RAM);
 	memcpy(p->payload, msg, sizeof(msg));
 
-	udp_sendto(g_udppcb, p, &multicast_destination, UDP_PORT_TRANS); //send a multicast packet
-
-
-
+	udp_sendto(multicast_receive_socket, p, &multicast_destination,
+	UDP_PORT_TRANS); //send a multicast packet
+	pbuf_free(p);
 
 	async_context_add_at_time_worker_in_ms(async_context_lwip,
 			&s_transmit_heartbeat, HEARTBEAT_TIMEOUT_MS);
 }
 
-void async_lwip_init(async_context_t *asc)
-{
+void async_lwip_init(async_context_t *asc) {
 	bool success;
 	async_context_lwip = asc;
 
+	IP4_ADDR(&multicast_destination, 224, 0, 0, 1); //Multicast IP address.
+
 	success = lwip_nosys_init(async_context_lwip);
-	if (!success)
-	{
+	if (!success) {
 		app_panic("lwip init fail");
 	}
 
+	{
+		multicast_receive_socket = udp_new();
+		udp_bind(multicast_receive_socket, NULL, UDP_PORT); //to allow receiving multicast
+		udp_recv(multicast_receive_socket, recCallBack, NULL); //recCallBack is the callback function that will be called every time you    receive multicast
+	}
 	//--- add multicast receive
 	{
-		struct ip4_addr localIP;
+		igmp_init(); // always fail igmp:join
 
-		IP4_ADDR(&multicast_destination, 224, 0, 0, 1); //Multicast IP address.
-		IP4_ADDR(&localIP, 192, 168, 178, 35); //Interface IP address
-
-		s8_t iret = igmp_joingroup((ip4_addr_t*) (&localIP),
-				(ip4_addr_t*) (&multicast_destination));
-
-		g_udppcb = (struct udp_pcb*) udp_new();
-		udp_bind(g_udppcb, NULL, UDP_PORT); //to allow receiving multicast
-		udp_recv(g_udppcb, recCallBack, NULL); //recCallBack is the callback function that will be called every time you    receive multicast
+		err_t iret = igmp_joingroup(IP_ADDR_ANY, &multicast_destination);
+		if (iret != ERR_OK) {
+			printf("\nigmp_joingroup result %i", iret);
+			//app_panic("\n\nigmp_joingroup fail");
+		}
 	}
 	{
 		s_transmit_heartbeat.do_work = transmit_heartbeat;
