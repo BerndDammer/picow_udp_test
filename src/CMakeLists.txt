@@ -38,7 +38,7 @@ pico_set_program_name(udp_test1 "udp_test1")
 pico_set_program_version(udp_test1 "0.1")
 
 pico_enable_stdio_uart(udp_test1 1)
-pico_enable_stdio_usb(udp_test1 1)
+pico_enable_stdio_usb(udp_test1 0)
 
 # Add the standard library to the build
 target_link_libraries(udp_test1

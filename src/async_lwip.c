@@ -89,6 +89,7 @@ void async_lwip_init(async_context_t *asc) {
 
 		err_t iret = igmp_joingroup(IP_ADDR_ANY, &multicast_destination);
 		if (iret != ERR_OK) {
+			// TODO: result is -6 but it runs anyway
 			printf("\nigmp_joingroup result %i", iret);
 			//app_panic("\n\nigmp_joingroup fail");
 		}
