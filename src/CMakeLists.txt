@@ -31,6 +31,7 @@ add_executable(udp_test1
 	async_console.c 
 	async_blinky.c 
 	async_cyw43.c 
+	async_heartbeat.c 
 	panic.c
 )
 

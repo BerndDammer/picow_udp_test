@@ -30,15 +30,13 @@
 
 #include "panic.h"
 #include "async_lwip.h"
+#include "async_heartbeat.h"
 
 #define UDP_PORT 50000
 #define UDP_PORT_TRANS 50100
 #define HEARTBEAT_TIMEOUT_MS 1000
 
 async_context_t *async_context_lwip;
-async_at_time_worker_t s_transmit_heartbeat;
-
-static char msg[] = "ooejtkperjgropejgrep";
 
 ip4_addr_t multicast_destination;
 struct udp_pcb *multicast_receive_socket;
@@ -49,22 +47,27 @@ void recCallBack(void *arg, struct udp_pcb *pcb, struct pbuf *p,
 		const ip_addr_t *addr, u16_t port) {
 
 	printf("\nReceive %i", reciece_counter++);
+	printf("\np ->tot_len %i", p ->tot_len);
+	if( p-> len == sizeof( can_msg_t))
+	{
+		can_incomming((can_msg_t*)(p->payload));
+	}
+	else
+	{
+		printf("\np ->len %i", p ->len);
+	}
 	pbuf_free(p);
 }
 
-void transmit_heartbeat(async_context_t *context,
-		struct async_work_on_timeout *worker) {
-
+void async_lwip_can_send(can_msg_t *msg)
+{
 	struct pbuf *p;
-	p = pbuf_alloc(PBUF_TRANSPORT, sizeof(msg), PBUF_RAM);
-	memcpy(p->payload, msg, sizeof(msg));
+	p = pbuf_alloc(PBUF_TRANSPORT, sizeof(can_msg_t), PBUF_RAM);
+	memcpy(p->payload, msg, sizeof(can_msg_t));
 
 	udp_sendto(multicast_receive_socket, p, &multicast_destination,
 	UDP_PORT_TRANS); //send a multicast packet
 	pbuf_free(p);
-
-	async_context_add_at_time_worker_in_ms(async_context_lwip,
-			&s_transmit_heartbeat, HEARTBEAT_TIMEOUT_MS);
 }
 
 void async_lwip_init(async_context_t *asc) {
@@ -90,14 +93,9 @@ void async_lwip_init(async_context_t *asc) {
 		err_t iret = igmp_joingroup(IP_ADDR_ANY, &multicast_destination);
 		if (iret != ERR_OK) {
 			// TODO: result is -6 but it runs anyway
-			printf("\nigmp_joingroup result %i", iret);
+			printf("\nigmp_joingroup result %i\n", iret);
 			//app_panic("\n\nigmp_joingroup fail");
 		}
-	}
-	{
-		s_transmit_heartbeat.do_work = transmit_heartbeat;
-		async_context_add_at_time_worker_in_ms(async_context_lwip,
-				&s_transmit_heartbeat, HEARTBEAT_TIMEOUT_MS);
 	}
 }
 

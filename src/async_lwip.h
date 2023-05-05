@@ -8,8 +8,10 @@
 #ifndef ASYNC_LWIP_H_
 #define ASYNC_LWIP_H_
 
-void async_lwip_init(async_context_t *asc);
+#include "can.h"
 
+void async_lwip_init(async_context_t *asc);
+void async_lwip_can_send(can_msg_t *msg);
 
 
 

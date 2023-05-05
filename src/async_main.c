@@ -20,6 +20,7 @@
 #include "async_lwip.h"
 #include "async_console.h"
 #include "async_blinky.h"
+#include "async_heartbeat.h"
 #include "panic.h"
 
 
@@ -30,6 +31,7 @@ void async_main_loop(void)
 	//async_context_t *async_context_lwip;;
 	async_context_t *async_context_console;
 	async_context_t *async_context_blinky;
+	async_context_t *async_context_heartbeat;
 
 	printf("\nStarting");
 	printf("\nTime ms since start %i", //
@@ -54,12 +56,19 @@ void async_main_loop(void)
 		app_panic("blinky iii");
 	}
 
+	async_context_heartbeat = async_heartbeat_init();
+	if (async_context_heartbeat == NULL )
+	{
+		app_panic("heartbeat iii");
+	}
+
 	while (true)
 	{
 		async_context_poll( async_context_cyw43);
 		//async_context_poll( async_context_lwip);
 		async_context_poll( async_context_console);
 		async_context_poll( async_context_blinky);
+		async_context_poll( async_context_heartbeat);
 
 		poll_counter++;
 	}
