@@ -43,18 +43,22 @@ struct udp_pcb *multicast_receive_socket;
 
 int reciece_counter = 0;
 
+// thats magic
+extern struct netif gnetif;
+
 void recCallBack(void *arg, struct udp_pcb *pcb, struct pbuf *p,
-		const ip_addr_t *addr, u16_t port) {
+		const ip_addr_t *addr, u16_t port)
+{
 
 	printf("\nReceive %i", reciece_counter++);
-	printf("\np ->tot_len %i", p ->tot_len);
-	if( p-> len == sizeof( can_msg_t))
+	printf("\np ->tot_len %i", p->tot_len);
+	if (p->len == sizeof(can_msg_t))
 	{
-		can_incomming((can_msg_t*)(p->payload));
+		can_incomming((can_msg_t*) (p->payload));
 	}
 	else
 	{
-		printf("\np ->len %i", p ->len);
+		printf("\np ->len %i", p->len);
 	}
 	pbuf_free(p);
 }
@@ -70,14 +74,16 @@ void async_lwip_can_send(can_msg_t *msg)
 	pbuf_free(p);
 }
 
-void async_lwip_init(async_context_t *asc) {
+void async_lwip_init(async_context_t *asc)
+{
 	bool success;
 	async_context_lwip = asc;
 
 	IP4_ADDR(&multicast_destination, 224, 0, 0, 1); //Multicast IP address.
 
 	success = lwip_nosys_init(async_context_lwip);
-	if (!success) {
+	if (!success)
+	{
 		app_panic("lwip init fail");
 	}
 
@@ -91,7 +97,8 @@ void async_lwip_init(async_context_t *asc) {
 		igmp_init(); // always fail igmp:join
 
 		err_t iret = igmp_joingroup(IP_ADDR_ANY, &multicast_destination);
-		if (iret != ERR_OK) {
+		if (iret != ERR_OK)
+		{
 			// TODO: result is -6 but it runs anyway
 			printf("\nigmp_joingroup result %i\n", iret);
 			//app_panic("\n\nigmp_joingroup fail");
