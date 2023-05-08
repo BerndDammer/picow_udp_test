@@ -13,6 +13,11 @@
  * lwip and cyw43 must be initialized with the same
  * async_context ???
  *
+ * TRAP:
+ *
+ * multicast address 224.0.0.1 must NOT be joined
+ *
+ *
  *
  */
 
