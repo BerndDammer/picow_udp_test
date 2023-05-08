@@ -32,8 +32,8 @@
 #include "async_lwip.h"
 #include "async_heartbeat.h"
 
-#define UDP_PORT 50000
-#define UDP_PORT_TRANS 50100
+#define UDP_PORT_RECEIVE 50000
+#define UDP_PORT_TRANS   50100
 #define HEARTBEAT_TIMEOUT_MS 1000
 
 async_context_t *async_context_lwip;
@@ -50,8 +50,6 @@ void recCallBack(void *arg, struct udp_pcb *pcb, struct pbuf *p,
 		const ip_addr_t *addr, u16_t port)
 {
 
-	printf("\nReceive %i", reciece_counter++);
-	printf("\np ->tot_len %i", p->tot_len);
 	if (p->len == sizeof(can_msg_t))
 	{
 		can_incomming((can_msg_t*) (p->payload));
@@ -89,20 +87,10 @@ void async_lwip_init(async_context_t *asc)
 
 	{
 		multicast_receive_socket = udp_new();
-		udp_bind(multicast_receive_socket, NULL, UDP_PORT); //to allow receiving multicast
+		udp_bind(multicast_receive_socket, NULL, UDP_PORT_RECEIVE); //to allow receiving multicast
 		udp_recv(multicast_receive_socket, recCallBack, NULL); //recCallBack is the callback function that will be called every time you    receive multicast
 	}
 	//--- add multicast receive
-	{
-		igmp_init(); // always fail igmp:join
-
-		err_t iret = igmp_joingroup(IP_ADDR_ANY, &multicast_destination);
-		if (iret != ERR_OK)
-		{
-			// TODO: result is -6 but it runs anyway
-			printf("\nigmp_joingroup result %i\n", iret);
-			//app_panic("\n\nigmp_joingroup fail");
-		}
-	}
+	igmp_init();
 }
 
