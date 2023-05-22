@@ -82,7 +82,9 @@ void async_lwip_init(async_context_t *asc)
 	bool success;
 	async_context_lwip = asc;
 
-	IP4_ADDR(&multicast_destination, 224, 0, 0, 1); //Multicast IP address.
+//	IP4_ADDR(&multicast_destination, 224, 0, 0, 1); //Multicast IP address.
+	// TODO better logic
+	IP4_ADDR(&multicast_destination, 192, 168, 178, 255); //local broadcast
 
 	success = lwip_nosys_init(async_context_lwip);
 	if (!success)
@@ -96,6 +98,6 @@ void async_lwip_init(async_context_t *asc)
 		udp_recv(multicast_receive_socket, recCallBack, NULL); //recCallBack is the callback function that will be called every time you    receive multicast
 	}
 	//--- add multicast receive
-	igmp_init();
+	//igmp_init();
 }
 
