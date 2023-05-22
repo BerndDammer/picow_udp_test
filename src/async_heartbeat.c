@@ -23,10 +23,12 @@ async_at_time_worker_t s_process_heartbeat;
 
 absolute_time_t last_incomming_hertbeat_time;
 short last_incomming_counter;
+short last_echo;
 short my_heartbeat_counter = 1;
 
 void can_incomming(can_msg_t *msg) {
-	last_incomming_counter = msg->data[0] | msg->data[1] >> 8;
+	last_incomming_counter = msg->data[0] | msg->data[1] << 8;
+	last_echo = msg->data[2] | msg->data[3] << 8;
 	last_incomming_hertbeat_time = get_absolute_time();
 }
 
@@ -38,11 +40,11 @@ void process_heartbeat(async_context_t *context,
 	msg.id = CAN_ID_HEARTBEAT;
 	msg.len = 8;
 	msg.data[0] = my_heartbeat_counter;
-	msg.data[1] = my_heartbeat_counter << 8;
-	msg.data[4] = 0;
-	msg.data[5] = 0;
-	msg.data[6] = 0;
-	msg.data[7] = 0;
+	msg.data[1] = my_heartbeat_counter >> 8;
+	msg.data[4] = last_echo;
+	msg.data[5] = last_echo >> 8;
+	msg.data[6] = 0XCA;
+	msg.data[7] = 0XFE;
 
 	if (absolute_time_diff_us( /* */
 	get_absolute_time(), /**/
@@ -50,7 +52,7 @@ void process_heartbeat(async_context_t *context,
 	) > 0l) /**/
 	{
 		msg.data[2] = last_incomming_counter;
-		msg.data[3] = last_incomming_counter << 8;
+		msg.data[3] = last_incomming_counter >> 8;
 	} else {
 		msg.data[2] = 0XFF;
 		msg.data[3] = 0XFF;
