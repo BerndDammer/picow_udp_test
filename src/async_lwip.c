@@ -84,7 +84,8 @@ void async_lwip_init(async_context_t *asc)
 
 //	IP4_ADDR(&multicast_destination, 224, 0, 0, 1); //Multicast IP address.
 	// TODO better logic
-	IP4_ADDR(&multicast_destination, 192, 168, 178, 255); //local broadcast
+//	IP4_ADDR(&multicast_destination, 192, 168, 178, 255); //local broadcast
+	IP4_ADDR(&multicast_destination, 255, 255, 255, 255); //non routing local broadcast
 
 	success = lwip_nosys_init(async_context_lwip);
 	if (!success)
